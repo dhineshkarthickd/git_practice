@@ -1,0 +1,25 @@
+name: Automated Release Creation
+on:
+  push:
+    branches: [main]
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Calculate and Mint New SemVer Version
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v1.0.0")
+          VERSION_BITS=(${LATEST_TAG//./ })
+          PATCH_BIT=${VERSION_BITS[2]}
+          NEW_PATCH=$((PATCH_BIT + 1))
+          NEXT_VERSION="${VERSION_BITS[0]}.${VERSION_BITS[1]}.${NEW_PATCH}"
+          echo "Minting Next Target Version: $NEXT_VERSION"
+          gh release create "$NEXT_VERSION" --generate-notes
+
