@@ -1,1 +1,2 @@
 Hello from B
+New line in B
